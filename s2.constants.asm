@@ -2067,7 +2067,7 @@ ArtTile_ArtNem_Aquis                  = $0500
 ArtTile_ArtNem_Octus                  = $0538
 
 ; MCZ
-ArtTile_ArtNem_Flasher                = $03A8
+ArtTile_ArtNem_Flasher                = $0500
 ArtTile_ArtNem_Crawlton               = $03C0
 ArtTile_ArtNem_Crate                  = $03D4
 ArtTile_ArtNem_MCZCollapsePlat        = $03F4
@@ -2278,4 +2278,4 @@ ArtTile_ArtNem_BigRing_Flash          = $0462
 ArtTile_ArtNem_EndPoints              = $04B6
 ArtTile_ArtNem_BreakWall              = $0590
 ArtTile_ArtNem_GHZ_Purple_Rock        = $06C0
-
+ArtTile_ArtNem_Newtron			  	  = $0500

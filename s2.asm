@@ -1241,7 +1241,7 @@ PlayMusic:
 	move.w	#$2300,sr
 	rts
 +
-	move.b	d0,(Z80_RAM+zAbsVar.SFXToPlay).l
+	move.b	d0,(Z80_RAM+zAbsVar.QueueToPlay).l
 	startZ80
 	move.w	#$2300,sr
 	rts
@@ -1271,7 +1271,7 @@ PlaySoundLocal:
 PlaySound:
 	move.w	#$2700,sr
 	stopZ80
-	move.b	d0,(Z80_RAM+zAbsVar.SFXUnknown).l
+	move.b	d0,(Z80_RAM+zAbsVar.SFXToPlay).l
 	startZ80
 	move.w	#$2300,sr
 +
@@ -2406,7 +2406,7 @@ PalCycle_HTZ:
 	lea	(CyclingPal_Lava).l,a0
 	subq.w	#1,(PalCycle_Timer).w
 	bpl.s	+	; rts
-	move.w	#0,(PalCycle_Timer).w
+	move.w	#1,(PalCycle_Timer).w
 	move.w	(PalCycle_Frame).w,d0
 	addq.w	#1,(PalCycle_Frame).w
 	andi.w	#$F,d0
@@ -2414,7 +2414,7 @@ PalCycle_HTZ:
 	;move.b	PalCycle_HTZ_LavaDelayData(pc,d0.w),(PalCycle_Timer+1).w
 	lsl.w	#3,d0
 	move.l	(a0,d0.w),(Normal_palette_line2+6).w
-	move.w	(a0,d0.w),(Normal_palette_line3).w
+	;move.w	(a0,d0.w),(Normal_palette_line3).w
 	move.l	4(a0,d0.w),(Normal_palette_line2+$1C).w
 +	rts
 ; ===========================================================================
@@ -9544,13 +9544,13 @@ SSStartNewAct:
 ; ----------------------------------------------------------------------------
 ; Misc_7756:
 SpecialStage_RingReq_Team:
-	dc.b  40, 80,140,120	; 4
-	dc.b  50,100,140,150	; 8
-	dc.b  60,110,160,170	; 12
-	dc.b  40,100,150,160	; 16
-	dc.b  55,110,200,200	; 20
-	dc.b  80,140,220,220	; 24
-	dc.b 100,190,210,210	; 28
+	dc.b  0, 0,0,0	; 4
+	dc.b  0,0,0,0	; 8
+	dc.b  0,0,0,0	; 12
+	dc.b  0,0,0,0	; 16
+	dc.b  0,0,0,0	; 20
+	dc.b  0,0,0,0	; 24
+	dc.b 0,0,1,0	; 28
 ; ----------------------------------------------------------------------------
 ; Ring requirement values for Sonic or Tails alone games
 ;
@@ -9560,13 +9560,13 @@ SpecialStage_RingReq_Team:
 ; ----------------------------------------------------------------------------
 ; Misc_7772:
 SpecialStage_RingReq_Alone:
-	dc.b  30, 70,130,110	; 4
-	dc.b  50,100,140,140	; 8
-	dc.b  50,110,160,160	; 12
-	dc.b  40,110,150,150	; 16
-	dc.b  50, 90,160,160	; 20
-	dc.b  80,140,210,210	; 24
-	dc.b 100,150,190,190	; 28
+	dc.b  0, 0,0,0	; 4
+	dc.b  0,0,0,0	; 8
+	dc.b  0,0,0,0	; 12
+	dc.b  0,0,0,0	; 16
+	dc.b  0,0,0,0	; 20
+	dc.b  0,0,0,0	; 24
+	dc.b 0,0,1,0	; 28
 
 ; special stage palette table
 ; word_778E:
@@ -19498,8 +19498,8 @@ LevEvents_OOZ2_Routine2:
 	move.b	#8,(Current_Boss_ID).w
 	moveq	#PLCID_OozBoss,d0
 	jsrto	(LoadPLC).l, JmpTo2_LoadPLC
-	moveq	#PalID_OOZ_B,d0
-	jsrto	(PalLoad_Now).l, JmpTo2_PalLoad_Now
+	;moveq	#PalID_OOZ_B,d0
+	;jsrto	(PalLoad_Now).l, JmpTo2_PalLoad_Now
 +
 	rts
 ; ===========================================================================
@@ -19715,7 +19715,7 @@ LevEvents_CNZ2_Routine3:
 	move.b	#ObjID_CNZBoss,id(a1) ; load obj51
 +
 	addq.b	#2,(Dynamic_Resize_Routine).w
-	move.w	#MusID_Boss,d0
+	move.w	#MusID_Boss3,d0
 	jsrto	(PlayMusic).l, JmpTo3_PlayMusic
 +
 	rts
@@ -22529,7 +22529,7 @@ zoneAnimals macro first,second
 	zoneAnimals.b Rabbit,	Eagle	; CPZ
 	zoneAnimals.b Pig,	Chicken	; DEZ
 	zoneAnimals.b Penguin,	Bird	; ARZ
-	zoneAnimals.b Turtle,	Chicken	; SCZ
+	zoneAnimals.b Chicken,	Chicken	; SCZ
     zoneTableEnd
 
 ; word_118F0:
@@ -27780,6 +27780,12 @@ ObjPtr_ContinueText:
 ObjPtr_ContinueIcons:	dc.l ObjDA	; Continue text
 ObjPtr_ContinueChars:	dc.l ObjDB	; Sonic lying down or Tails nagging (continue screen)
 ObjPtr_RingPrize:	dc.l ObjDC	; Ring prize from Casino Night Zone
+	dc.l Burrobot
+	dc.l ObjNull
+	dc.l Obj_Projectile ; DF
+	dc.l ObjNull
+	dc.l ObjNull
+	dc.l ObjNewtron ; E2
 ; ===========================================================================
 ; ----------------------------------------------------------------------------
 ; Object 4C, 4D, 4E, 4F, 62, D0, and D1
@@ -27825,7 +27831,8 @@ ObjectMoveAndFall:
 
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
-; sub_163AC: SpeedToPos:
+; sub_163AC: 
+SpeedToPos:
 ObjectMove:
 	move.l	x_pos(a0),d2	; load x position
 	move.l	y_pos(a0),d3	; load y position
@@ -40941,9 +40948,11 @@ return_1EDF8:
 
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
-; loc_1EDFA: ObjHitFloor:
+; loc_1EDFA: 
+ObjHitFloor:
 ObjCheckFloorDist:
 	move.w	x_pos(a0),d3
+ObjHitFloor2:
 	move.w	y_pos(a0),d2
 	move.b	y_radius(a0),d0
 	ext.w	d0
@@ -47010,6 +47019,7 @@ JmpTo19_Adjust2PArtPointer ; JmpTo
 ; OST:
 oil_char1submersion	= objoff_38 ; $38(a0)
 oil_char2submersion	= objoff_3A ; $3A(a0)
+oil_timer			= objoff_3E ; $3E(a0)
 ; ----------------------------------------------------------------------------
 ; Sprite_24020:
 Obj07:
@@ -47030,6 +47040,7 @@ Obj07_Init:
 	move.b	#$20,width_pixels(a0)
 	move.w	y_pos(a0),objoff_30(a0)
 	move.b	#$30,oil_char1submersion(a0)
+	move.w	#15,oil_timer(a0)
 	bset	#7,status(a0)
 
 ; loc_24054:
@@ -47050,12 +47061,20 @@ Obj07_Main:
 ; loc_24078:
 Obj07_CheckKillChar1:
 	tst.b	oil_char1submersion(a0)
-	beq.s	Obj07_SuffocateCharacter
+	beq.w	Obj07_SuffocateCharacter
 	subq.b	#1,oil_char1submersion(a0)
+	subq.w	#1,oil_timer(a0)
+	tst.w	oil_timer(a0)
+	bne.s	+
 	subq.w	#1,(Ring_count).w
 	ori.b	#$81,(Update_HUD_rings).w
+	move.w	#15,oil_timer(a0)
 	move.b	#SndID_Ring,d0 ; play the ring sound for a successfully entered cheat
 	jsr	PlaySound
+	tst.w	(Ring_count).w
+	bne.s	+
+	bra.s	Obj07_SuffocateCharacter
++
 
 ; loc_24082:
 Obj07_CheckSupportChar1:
@@ -85969,6 +85988,7 @@ PlrList_Ehz2: plrlistheader
 	plreq ArtTile_ArtNem_DignlSprng, ArtNem_DignlSprng
 	plreq ArtTile_ArtNem_VrtclSprng, ArtNem_VrtclSprng
 	plreq ArtTile_ArtNem_HrzntlSprng, ArtNem_HrzntlSprng
+	plreq ArtTile_ArtNem_Newtron, ArtNem_Newtron
 PlrList_Ehz2_End
 ;---------------------------------------------------------------------------------------
 ; Pattern load queue
@@ -86159,6 +86179,7 @@ PlrList_Mcz2: plrlistheader
 	plreq ArtTile_ArtNem_LeverSpring, ArtNem_LeverSpring
 	plreq ArtTile_ArtNem_VrtclSprng, ArtNem_VrtclSprng
 	plreq ArtTile_ArtNem_HrzntlSprng, ArtNem_HrzntlSprng
+	plreq $520, ArtNem_Burrobot
 PlrList_Mcz2_End
 ;---------------------------------------------------------------------------------------
 ; Pattern load queue
@@ -86348,7 +86369,7 @@ PlrList_MczBoss_End
 ; CNZ Boss
 ;---------------------------------------------------------------------------------------
 PlrList_CnzBoss: plrlistheader
-	plreq ArtTile_ArtNem_Eggpod_4, ArtNem_Eggpod
+	plreq ArtTile_ArtNem_Eggpod_4, ArtNem_Eggpod2
 	plreq ArtTile_ArtNem_CNZBoss, ArtNem_CNZBoss
 	plreq ArtTile_ArtNem_FieryExplosion, ArtNem_FieryExplosion
 PlrList_CnzBoss_End
@@ -86441,7 +86462,7 @@ PlrList_OozAnimals_End
 ; SCZ Animals
 ;---------------------------------------------------------------------------------------
 PlrList_SczAnimals: plrlistheader
-	plreq ArtTile_ArtNem_Animal_1, ArtNem_Turtle
+	plreq ArtTile_ArtNem_Animal_1, ArtNem_among
 	plreq ArtTile_ArtNem_Animal_2, ArtNem_among
 PlrList_SczAnimals_End
 ;---------------------------------------------------------------------------------------
@@ -87707,6 +87728,8 @@ ArtNem_Masher:	BINCLUDE	"art/nemesis/EHZ Pirahna badnik.bin"
 ; Robotnik's main ship		; ArtNem_83BF6:
 	even
 ArtNem_Eggpod:	BINCLUDE	"art/nemesis/Eggpod.bin"
+	even
+ArtNem_Eggpod2:	BINCLUDE	"art/nemesis/Eggpod2.bin"
 ;--------------------------------------------------------------------------------------
 ; Nemesis compressed art (111 blocks)
 ; CPZ Boss			; ArtNem_84332:
@@ -89133,7 +89156,411 @@ Snd_Sega_End3:
 	even
 Snd_Sega4:	BINCLUDE	"sound/PCM/LECSBE36 (1).wav"
 Snd_Sega_End4:
+	even
+; ---------------------------------------------------------------------------
+; Object 23 - Buzz Bomber/Newtron missile
+; ---------------------------------------------------------------------------
+; OST:
+Obj_Projectile_parent:	equ $3C
+; ---------------------------------------------------------------------------
+
+Obj_Projectile:
+		moveq	#0,d0
+		move.b	routine(a0),d0
+		move.w	Obj_Projectile_Index(pc,d0.w),d1
+		jmp	Obj_Projectile_Index(pc,d1.w)
+; ===========================================================================
+Obj_Projectile_Index:	dc.w Obj_Projectile_Init-Obj_Projectile_Index
+		dc.w Obj_Projectile_Animate-Obj_Projectile_Index
+		dc.w Obj_Projectile_Move-Obj_Projectile_Index
+		dc.w Obj_Projectile_Delete-Obj_Projectile_Index
+		dc.w Obj_Projectile_Newtron-Obj_Projectile_Index
+; ===========================================================================
+; loc_A576:
+Obj_Projectile_Init:
+		addq.b	#2,routine(a0)
+		move.l	#Obj9D_Obj98_MapUnc_37D96,4(a0)
+		move.w	#ArtTile_ArtNem_Coconuts,2(a0)
+		move.b	#3,mapping_frame(a0)
+		jsr	Adjust2PArtPointer
+		move.b	#4,1(a0)
+		move.b	#3,$18(a0)
+		move.b	#8,$19(a0)
+		andi.b	#3,$22(a0)
+		move.b	#8,routine(a0)
+		move.b	#$87,$20(a0)
+		move.b	#1,$1C(a0)
+		bra.s	Obj_Projectile_Animate2
+; ===========================================================================
+; loc_A5C4:
+Obj_Projectile_Move:
+Obj_Projectile_Animate:
+		
+Obj_Projectile_Delete:
+		jmp	DeleteObject
+; ===========================================================================
+; loc_A634:
+Obj_Projectile_Newtron:
+		tst.b	1(a0)
+		bpl.s	Obj_Projectile_Delete
+		jsr	ObjectMove
+; loc_A63E:
+Obj_Projectile_Animate2:
+		jmp	DisplaySprite
+; ---------------------------------------------------------------------------
+; Object 42 - GHZ Newtron badnik
+; ---------------------------------------------------------------------------
+
+ObjNewtron:
+		moveq	#0,d0
+		move.b	routine(a0),d0
+		move.w	ObjNewtron_Index(pc,d0.w),d1
+		jmp	ObjNewtron_Index(pc,d1.w)
+; ===========================================================================
+ObjNewtron_Index:	dc.w ObjNewtron_Init-ObjNewtron_Index
+		dc.w ObjNewtron_Main-ObjNewtron_Index
+		dc.w ObjNewtron_Delete-ObjNewtron_Index
+; ===========================================================================
+; loc_EBCC:
+ObjNewtron_Init:
+		addq.b	#2,routine(a0)
+		move.l	#Map_ObjNewtron,4(a0)
+		move.w	#ArtTile_ArtNem_Newtron,2(a0)
+		jsr	Adjust2PArtPointer
+		move.b	#4,1(a0)
+		move.b	#4,$18(a0)
+		move.b	#$14,$19(a0)
+		move.b	#$10,$16(a0)
+		move.b	#8,$17(a0)
+; loc_EC00:
+ObjNewtron_Main
+		moveq	#0,d0
+		move.b	$25(a0),d0
+		move.w	ObjNewtron_Main_Index(pc,d0.w),d1
+		jsr	ObjNewtron_Main_Index(pc,d1.w)
+		lea	(Ani_ObjNewtron).l,a1
+		jsr	AnimateSprite
+		jmp	MarkObjGone
+; ===========================================================================
+ObjNewtron_Main_Index:	dc.w ObjNewtron_ChkDistance-ObjNewtron_Main_Index
+			dc.w ObjNewtron_Type00-ObjNewtron_Main_Index
+			dc.w ObjNewtron_ChkFloor-ObjNewtron_Main_Index
+			dc.w ObjNewtron_Move-ObjNewtron_Main_Index
+			dc.w ObjNewtron_Type02-ObjNewtron_Main_Index
+; ===========================================================================
+; loc_EC26:
+ObjNewtron_ChkDistance:
+		bset	#0,$22(a0)
+		move.w	($FFFFB008).w,d0
+		sub.w	8(a0),d0
+		bcc.s	loc_EC3E
+		neg.w	d0
+		bclr	#0,$22(a0)
+
+loc_EC3E:
+		cmpi.w	#$80,d0
+		bcc.s	locret_EC6A
+		addq.b	#2,$25(a0)
+		move.b	#1,$1C(a0)
+		tst.b	$28(a0)
+		beq.s	locret_EC6A
+		move.w	#ArtTile_ArtNem_Newtron,2(a0)
+		jsr	Adjust2PArtPointer
+		move.b	#8,$25(a0)
+		move.b	#4,$1C(a0)
+
+locret_EC6A:
+		rts
+; ===========================================================================
+; Blue Newtron that appears before chasing Sonic/Tails
+; loc_EC6C:
+ObjNewtron_Type00:
+		cmpi.b	#4,$1A(a0)
+		bcc.s	ObjNewtron_Fall
+		bset	#0,$22(a0)
+		move.w	($FFFFB008).w,d0
+		sub.w	8(a0),d0
+		bcc.s	locret_EC8A
+		bclr	#0,$22(a0)
+
+locret_EC8A:
+		rts
+; ---------------------------------------------------------------------------
+; loc_EC8C:
+ObjNewtron_Fall:
+		cmpi.b	#1,$1A(a0)
+		bne.s	loc_EC9A
+		move.b	#$C,$20(a0)
+
+loc_EC9A:
+		jsr	ObjectMoveAndFall
+		jsr	ObjHitFloor
+		tst.w	d1
+		bpl.s	locret_ECDE
+		add.w	d1,$C(a0)
+		move.w	#0,$12(a0)
+		addq.b	#2,$25(a0)
+		move.b	#2,$1C(a0)
+		btst	#5,2(a0)
+		beq.s	loc_ECC6
+		addq.b	#1,$1C(a0)
+
+loc_ECC6:
+		move.b	#$D,$20(a0)
+		move.w	#$200,$10(a0)
+		btst	#0,$22(a0)
+		bne.s	locret_ECDE
+		neg.w	$10(a0)
+
+locret_ECDE:
+		rts
+; ===========================================================================
+; loc_ECE0:
+ObjNewtron_ChkFloor:
+		jsr	ObjectMove
+		jsr	ObjHitFloor
+		cmpi.w	#-8,d1
+		blt.s	loc_ECFA
+		cmpi.w	#$C,d1
+		bge.s	loc_ECFA
+		add.w	d1,$C(a0)
+		rts
+; ---------------------------------------------------------------------------
+
+loc_ECFA:
+		addq.b	#2,$25(a0)
+		rts
+; ===========================================================================
+; loc_ED00:
+ObjNewtron_Move:
+		jsr	ObjectMove
+		rts
+; ===========================================================================
+; Green Newtron that fires a missile
+; loc_ED06:
+ObjNewtron_Type02:
+		cmpi.b	#1,$1A(a0)
+		bne.s	ObjNewtron_FireMissile
+		move.b	#$C,$20(a0)
+; loc_ED14:
+ObjNewtron_FireMissile:
+		cmpi.b	#2,$1A(a0)
+		bne.s	locret_ED6C
+		tst.b	$32(a0)
+		bne.s	locret_ED6C
+		move.b	#1,$32(a0)
+		jsr	SingleObjLoad
+		bne.s	locret_ED6C
+		move.b	#$DF,0(a1)
+		move.w	8(a0),8(a1)
+		move.w	$C(a0),$C(a1)
+		subq.w	#8,$C(a1)
+		move.w	#$200,$10(a1)
+		move.w	#$14,d0
+		btst	#0,$22(a0)
+		bne.s	loc_ED5C
+		neg.w	d0
+		neg.w	$10(a1)
+
+loc_ED5C:
+		add.w	d0,8(a1)
+		move.b	$22(a0),$22(a1)
+		move.b	#1,$28(a1)
+
+locret_ED6C:
+		rts
+; ===========================================================================
+; loc_ED6E:
+ObjNewtron_Delete:
+		jmp	DeleteObject
+; ===========================================================================
+; animation script
+Ani_ObjNewtron:	dc.w byte_ED7C-Ani_ObjNewtron
+		dc.w byte_ED7F-Ani_ObjNewtron
+		dc.w byte_ED87-Ani_ObjNewtron
+		dc.w byte_ED8B-Ani_ObjNewtron
+		dc.w byte_ED8F-Ani_ObjNewtron
+byte_ED7C:	dc.b  $F, $A,$FF
+byte_ED7F:	dc.b $13,  0,  1,  3,  4,  5,$FE,  1
+byte_ED87:	dc.b   2,  6,  7,$FF
+byte_ED8B:	dc.b   2,  8,  9,$FF
+byte_ED8F:	dc.b $13,  0,  1,  1,  2,  1,  1,  0
+		dc.b $FC
+; ---------------------------------------------------------------------------
+; Sprite mappings
+; ---------------------------------------------------------------------------
+Map_ObjNewtron:	binclude	"mappings/sprite/ObjNewtron.bin"
+	even
+ArtNem_Newtron: BINCLUDE "art/nemesis/Enemy Newtron.nem"
+	even
+ArtNem_Burrobot: BINCLUDE "art/nemesis/Enemy Burrobot.bin"
+	even
+Map_Burro:	binclude	"mappings/sprite/burrobot.bin"
 	even	
+; ---------------------------------------------------------------------------
+; Object 2D - Burrobot enemy (LZ)
+; ---------------------------------------------------------------------------
+
+Burrobot:
+		moveq	#0,d0
+		move.b	routine(a0),d0
+		move.w	Burro_Index(pc,d0.w),d1
+		jmp	Burro_Index(pc,d1.w)
+; ===========================================================================
+Burro_Index:	dc.w Burro_Main-Burro_Index
+		dc.w Burro_Action-Burro_Index
+
+burro_timedelay = $30		; time between direction changes
+; ===========================================================================
+
+Burro_Main:	; Routine 0
+		addq.b	#2,routine(a0)
+		move.b	#$13,y_radius(a0)
+		move.b	#8,x_radius(a0)
+		move.l	#Map_Burro,mappings(a0)
+		move.w	#$520,art_tile(a0)
+		ori.b	#4,render_flags(a0)
+		move.b	#4,priority(a0)
+		move.b	#5,collision_flags(a0)
+		move.b	#$C,width_pixels(a0)
+		addq.b	#6,routine_secondary(a0) ; run "Burro_ChkSonic" routine
+		move.b	#2,anim(a0)
+
+Burro_Action:	; Routine 2
+		moveq	#0,d0
+		move.b	routine_secondary(a0),d0
+		move.w	.index(pc,d0.w),d1
+		jsr	.index(pc,d1.w)
+		lea	(Ani_Burro).l,a1
+		jsr	AnimateSprite
+		jmp	MarkObjGone
+; ===========================================================================
+.index:		dc.w .changedir-.index
+		dc.w Burro_Move-.index
+		dc.w Burro_Jump-.index
+		dc.w Burro_ChkSonic-.index
+; ===========================================================================
+
+.changedir:
+		subq.w	#1,burro_timedelay(a0)
+		bpl.s	.nochg
+		addq.b	#2,routine_secondary(a0)
+		move.w	#255,burro_timedelay(a0)
+		move.w	#$80,x_vel(a0)
+		move.b	#1,anim(a0)
+		bchg	#0,status(a0)	; change direction the Burrobot	is facing
+		beq.s	.nochg
+		neg.w	x_vel(a0)	; change direction the Burrobot	is moving
+
+.nochg:
+		rts	
+; ===========================================================================
+
+Burro_Move:
+		subq.w	#1,burro_timedelay(a0)
+		bmi.s	loc_AD84
+		jsr	SpeedToPos
+		bchg	#0,$32(a0)
+		bne.s	loc_AD78
+		move.w	x_pos(a0),d3
+		addi.w	#$C,d3
+		btst	#0,status(a0)
+		bne.s	loc_AD6A
+		subi.w	#$18,d3
+
+loc_AD6A:
+		jsr	(ObjHitFloor2).l
+		cmpi.w	#$C,d1
+		bge.s	loc_AD84
+		rts	
+; ===========================================================================
+
+loc_AD78:
+		jsr	(ObjCheckFloorDist).l
+		add.w	d1,y_pos(a0)
+		rts	
+; ===========================================================================
+
+loc_AD84:
+		btst	#2,(Vint_runcount+3).w
+		beq.s	loc_ADA4
+		subq.b	#2,routine_secondary(a0)
+		move.w	#59,burro_timedelay(a0)
+		move.w	#0,x_vel(a0)
+		move.b	#0,anim(a0)
+		rts	
+; ===========================================================================
+
+loc_ADA4:
+		addq.b	#2,routine_secondary(a0)
+		move.w	#-$400,y_vel(a0)
+		move.b	#2,anim(a0)
+		rts	
+; ===========================================================================
+
+Burro_Jump:
+		jsr	SpeedToPos
+		addi.w	#$18,y_vel(a0)
+		bmi.s	locret_ADF0
+		move.b	#3,anim(a0)
+		jsr	(ObjCheckFloorDist).l
+		tst.w	d1
+		bpl.s	locret_ADF0
+		add.w	d1,y_pos(a0)
+		move.w	#0,y_vel(a0)
+		move.b	#1,anim(a0)
+		move.w	#255,burro_timedelay(a0)
+		subq.b	#2,routine_secondary(a0)
+		jsr	Burro_ChkSonic2
+
+locret_ADF0:
+		rts	
+; ===========================================================================
+
+Burro_ChkSonic:
+		move.w	#$60,d2
+		jsr	Burro_ChkSonic2
+		bcc.s	locret_AE20
+		move.w	(MainCharacter+y_pos).w,d0
+		sub.w	y_pos(a0),d0
+		bcc.s	locret_AE20
+		cmpi.w	#-$80,d0
+		bcs.s	locret_AE20
+		tst.w	(Debug_placement_mode).w
+		bne.s	locret_AE20
+		subq.b	#2,routine_secondary(a0)
+		move.w	d1,x_vel(a0)
+		move.w	#-$400,y_vel(a0)
+
+locret_AE20:
+		rts	
+
+; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+
+
+Burro_ChkSonic2:
+		move.w	#$80,d1
+		bset	#0,status(a0)
+		move.w	(MainCharacter+x_pos).w,d0
+		sub.w	x_pos(a0),d0
+		bcc.s	loc_AE40
+		neg.w	d0
+		neg.w	d1
+		bclr	#0,status(a0)
+
+loc_AE40:
+		cmp.w	d2,d0
+		rts	
+; End of function Burro_ChkSonic2
+Ani_Burro:	dc.w .walk1-Ani_Burro
+		dc.w .walk2-Ani_Burro
+		dc.w .digging-Ani_Burro
+		dc.w .fall-Ani_Burro
+.walk1:		dc.b 3,	0, 6, $FF
+.walk2:		dc.b 3,	0, 1, $FF
+.digging:	dc.b 3,	2, 3, $FF
+.fall:		dc.b 3,	4, $FF
+		even
 ; end of 'ROM'
 	if padToPowerOfTwo && (*)&(*-1)
 		cnop	-1,2<<lastbit(*-1)

@@ -5,13 +5,13 @@ Supersonic_Header:
 	smpsHeaderTempo     $01, $FA
 
 	smpsHeaderDAC       Supersonic_DAC
-	smpsHeaderFM        Supersonic_FM1,	$F4, $13
-	smpsHeaderFM        Supersonic_FM2,	$F4, $0A
-	smpsHeaderFM        Supersonic_FM3,	$F4, $13
-	smpsHeaderFM        Supersonic_FM4,	$F4, $13
-	smpsHeaderFM        Supersonic_FM5,	$F4, $13
-	smpsHeaderPSG       Supersonic_PSG1,	$D0, $01, $00, fTone_09
-	smpsHeaderPSG       Supersonic_PSG2,	$D0, $03, $00, $00
+	smpsHeaderFM        Supersonic_FM1,	$00, $13
+	smpsHeaderFM        Supersonic_FM2,	$00, $0A
+	smpsHeaderFM        Supersonic_FM3,	$00, $13
+	smpsHeaderFM        Supersonic_FM4,	$00, $13
+	smpsHeaderFM        Supersonic_FM5,	$00, $13
+	smpsHeaderPSG       Supersonic_PSG1,	$00, $01, $00, fTone_09
+	smpsHeaderPSG       Supersonic_PSG2,	$00, $03, $00, $00
 	smpsHeaderPSG       Supersonic_PSG3,	$00, $03, $00, fTone_04
 
 ; FM1 Data

@@ -32,6 +32,7 @@ Invincible_Loop07:
 	dc.b	nRst, $30, nRst, nA5, $04, nB5, nCs6, nD6, nE6, nFs6, nB5, nCs6
 	dc.b	nEb6, nE6, nFs6, nAb6, nCs6, nEb6, nF6, nFs6, nAb6, nBb6, nF6, nFs6
 	dc.b	nAb6, nBb6, nC7, nCs7
+	dc.b	nEb2, $06, nRst, nEb2, nEb2, nFs2, nRst, nFs2, nRst, nG2	
 	smpsAlterVol        $03
 	smpsJump            Invincible_Loop07
 
@@ -52,6 +53,7 @@ Invincible_Loop06:
 	smpsLoop            $00, $02, Invincible_Loop06
 	dc.b	nA2, $0C, nB2, nCs3, nEb3, nB2, $06, nCs3, nEb3, nF3, nCs3, nEb3
 	dc.b	nF3, nFs3
+	dc.b	nEb3, $03, nRst, nEb3, nRst, nEb3, nRst, nEb3, nRst, nEb3
 	smpsNop             $01
 	smpsJump            Invincible_Loop05
 
@@ -69,6 +71,7 @@ Invincible_Loop03:
 Invincible_Loop04:
 	dc.b	nRst, $06, nG5, $12, nA5, $06, nRst, $12
 	smpsLoop            $00, $04, Invincible_Loop04
+	dc.b	nFs4, $0C, nFs4, $06, nFs4, nFs4, $0C, nFs4, nG4, nC5
 	smpsJump            Invincible_Loop03
 
 ; FM4 Data
@@ -85,6 +88,7 @@ Invincible_Loop01:
 Invincible_Loop02:
 	dc.b	nRst, $06, nB5, $12, nCs6, $06, nRst, $12
 	smpsLoop            $00, $04, Invincible_Loop02
+	dc.b	nC5, $0C, nC5, $06, nC5, nC5, $0C, nC5, nEb5, nG5
 	smpsJump            Invincible_Loop01
 
 ; PSG1 Data
@@ -120,6 +124,7 @@ Invincible_Loop00:
 	dc.b	dKick, $06, dSnare, $12, dKick, $0C, dSnare, dSnare, $06, dKick, $12, dKick
 	dc.b	$0C, dSnare, dSnare, $06, dKick, $0C, dSnare, $06, dKick, $0C, dSnare, dSnare
 	dc.b	$04, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare
+	dc.b	dKickS3, $0C, dSnareS3, $03, dSnareS3, dSnareS3, dSnareS3
 	smpsJump            Invincible_Loop00
 
 Invincible_Voices:

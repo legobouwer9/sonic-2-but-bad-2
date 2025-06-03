@@ -54,7 +54,7 @@ WFZ_Loop05:
 
 ; FM1 Data
 WFZ_FM1:
-	smpsSetvoice        $00
+	smpsSetvoice        $01
 	smpsAlterNote       $FF
 	dc.b	nRst, $12
 
@@ -85,9 +85,13 @@ WFZ_Loop03:
 
 ; FM2 Data
 WFZ_FM2:
+	smpsSetvoice        $01
+	smpsJump	WFZ_JMP
 ; PSG2 Data
 WFZ_PSG2:
-	smpsSetvoice        $01
+	smpsPSGvoice        $01
+
+WFZ_JMP:
 	dc.b	nRst, $12
 
 WFZ_Jump02:
